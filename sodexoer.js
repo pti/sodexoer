@@ -1,5 +1,6 @@
 const needle = require('needle')
 const fs = require('fs')
+const _ = require('lodash')
 
 const weekdayNames = {
     monday: "Maanantai",
@@ -11,6 +12,7 @@ const weekdayNames = {
     sunday: "Sunnuntai"
 }
 
+const args = process.argv.slice(2)
 const lang = "fi"
 const restaurantIds = ['134', '9870']
 const template = fs.readFileSync('template.html', 'utf8')
@@ -73,7 +75,8 @@ async function writeTableContent() {
     }
 
     const result = template.replace('<##>', out)
-    fs.writeFileSync('output.html', result, 'utf8')    
+    const dst = _.defaultTo(_.head(args), 'output.html')
+    fs.writeFileSync(dst, result, 'utf8')    
 }
 
 function zeroPad(number) {
