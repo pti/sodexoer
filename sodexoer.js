@@ -19,8 +19,6 @@ const template = fs.readFileSync('template.html', 'utf8')
 
 writeTableContent()
 
-// TODO lataa uudestaan automaattisesti kun päivä vaihtuu
-
 async function writeTableContent() {
     const weekDatas = await getWeekDatas(restaurantIds)
     let out = ""
