@@ -1,0 +1,11 @@
+{
+  "name": "sodexoer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "needle": "^2.1.0"
+  }
+}

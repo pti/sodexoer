@@ -1,0 +1,51 @@
+.active {
+    background-color: #F4F6F8;
+}
+.day {
+    padding: 4px 8px 4px 12px;
+    margin-top: 0px;
+    border-radius: 4px;
+}
+.weekday {
+    font-family: Open Sans, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0px 0 4px 0;
+}
+.food {
+    margin: 0px 0px 6px 0px;
+}
+.text {
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+    margin-right: 6px;
+    line-height: 1.0;
+}
+.info {
+    border-radius: 10px;
+    background: #F0F0F0;
+    border-style: solid;
+    border-color: #F0F0F0;
+    border-width: 0px 5px 0px 5px;
+    font-family: Open Sans, sans-serif;
+    font-size: 10px;
+    margin-right: 2px;
+}
+.restaurant {
+    width: 50%;
+    float: left;
+}
+td {
+    vertical-align: top;    
+}
+.restaurant_header {
+    padding: 12px 8px 12px 12px;
+    font-family: Open Sans, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: left;
+}
+a {
+    text-decoration: none;
+    color: black;
+}
