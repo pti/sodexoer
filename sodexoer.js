@@ -22,6 +22,7 @@ writeTableContent()
 async function writeTableContent() {
     const weekDatas = await getWeekDatas(restaurantIds)
     let out = ""
+    out += "<tr>"
 
     for (const weekData of weekDatas) {
 
@@ -30,8 +31,10 @@ async function writeTableContent() {
             url: weekData.meta.ref_url
         }
     
-        out += `<th class="restaurant_header"><a href=${restaurant.url}>${restaurant.name}</a></th>`
+        out += `<th class="restaurant_header"><a href="${restaurant.url}">${restaurant.name}</a></th>`
     }
+
+    out += "</tr>"
 
     for (const weekday in weekdayNames) {
         
@@ -56,7 +59,11 @@ async function writeTableContent() {
                     const price = item.price
         
                     out += `<p class="food"><span class="text">${title}</span>`
-        
+ 
+                    if (desc) {
+                        out += `<span class="desc">${desc}</span>`
+                    }
+
                     if (item.properties) {
                         const props = item.properties.split(/, */)
                         props.forEach(prop => out += `<span class="info">${prop}</span>`)

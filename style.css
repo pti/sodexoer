@@ -13,11 +13,19 @@
     margin: 0px 0 4px 0;
 }
 .food {
-    margin: 0px 0px 6px 0px;
+    margin: 0px 0px 5px 0px;
+    line-height: 1.0;
 }
 .text {
     font-family: Roboto, sans-serif;
     font-size: 14px;
+    margin-right: 6px;
+    line-height: 1.0;
+}
+.desc {
+    font-family: Roboto, sans-serif;
+    font-size: 12px;
+    vertical-align: middle;
     margin-right: 6px;
     line-height: 1.0;
 }
