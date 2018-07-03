@@ -6,7 +6,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "lodash": "^4.17.4",
-    "needle": "^2.1.0"
+    "lodash": "^4.17.10",
+    "needle": "^2.2.1"
   }
 }
