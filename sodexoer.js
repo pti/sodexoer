@@ -1,6 +1,7 @@
 const needle = require('needle')
 const fs = require('fs')
 const _ = require('lodash')
+const antellizer = require('./antellizer.js')
 
 const weekdayNames = {
     monday: "Maanantai",
@@ -14,13 +15,19 @@ const weekdayNames = {
 
 const args = process.argv.slice(2)
 const lang = "fi"
-const restaurantIds = ['134', '9870']
+
+const restaurants = [
+    {type: 'sodexo', id: 134, name: 'Hermia 5'},
+    {type: 'sodexo', id: 9870, name: 'Hermia 6'},
+    {type: 'antell', id: 342, name: 'Farmi'},
+]
+
 const template = fs.readFileSync('template.html', 'utf8')
 
 writeTableContent()
 
 async function writeTableContent() {
-    const weekDatas = await getWeekDatas(restaurantIds)
+    const weekDatas = await getWeekDatas(restaurants)
     let out = ""
     out += "<tr>"
 
@@ -43,7 +50,11 @@ async function writeTableContent() {
         }
 
         out += "<tr>"
-        const weekdayName = weekdayNames[weekday]
+        let weekdayName = weekdayNames[weekday]
+
+        if (weekdayName === undefined) {
+            weekdayName = weekday
+        }
 
         for (const weekData of weekDatas) {
             out += '<td class="day">'
@@ -54,25 +65,10 @@ async function writeTableContent() {
             if (menuItems !== undefined) {
 
                 for (const item of menuItems) {
-                    const title = item[`title_${lang}`]
-                    const desc = item[`desc_${lang}`]
-                    const price = item.price
-        
-                    out += `<p class="food"><span class="text">${title}</span>`
- 
-                    if (desc) {
-                        out += `<span class="desc">${desc}</span>`
-                    }
-
-                    if (item.properties) {
-                        const props = item.properties.split(/, */)
-                        props.forEach(prop => out += `<span class="info">${prop}</span>`)
-                    }
-                    
-                    out += '</p>'
+                    out += menuItemAsHtml(item, lang)
                 }    
             }
-        
+
             out += '</td>'    
         }
 
@@ -84,6 +80,37 @@ async function writeTableContent() {
     fs.writeFileSync(dst, result, 'utf8')    
 }
 
+function menuItemAsHtml(item, lang) {
+    let out = `<p class="food">`
+
+    if (item.parts !== undefined) {
+
+        for (let part of item.parts) {
+            out += `<span class="text">${part.text}</span>`
+            part.properties.forEach(prop => out += `<span class="info">${prop}</span>`)
+        }
+
+    } else {
+        const title = item[`title_${lang}`]
+        const desc = item[`desc_${lang}`]
+        const price = item.price
+
+        out += `<span class="text">${title}</span>`
+
+        if (desc) {
+            out += `<span class="desc">${desc}</span>`
+        }
+
+        if (item.properties) {
+            const props = item.properties.split(/, */)
+            props.forEach(prop => out += `<span class="info">${prop}</span>`)
+        }
+    }
+
+    out += '</p>'
+    return out
+}
+
 function zeroPad(number) {
     return number < 10 ? "0" + number : number;
 }
@@ -93,17 +120,29 @@ function datePart() {
     return `${date.getFullYear()}/${zeroPad(date.getMonth() + 1)}/${zeroPad(date.getDate())}`
 }
 
-function weeklyUrl(restaurantId) {
+function sodexoWeeklyUrl(restaurantId) {
     return `https://www.sodexo.fi/ruokalistat/output/weekly_json/${restaurantId}/${datePart()}/${lang}`
 }
 
 async function getWeekDatas(restaurantIds) {
     let result = []
 
-    for (const restaurantId of restaurantIds) {
-        let data = await get(weeklyUrl(restaurantId))
+    for (const restaurant of restaurants) {
+        let data = undefined
+        let url = undefined
+
+        if (restaurant.type == 'sodexo') {
+            url = sodexoWeeklyUrl(restaurant.id)
+            data = await get(url)
+
+        } else if (restaurant.type == 'antell') {
+            url = `https://www.antell.fi/lounaslistat/lounaslista.html?owner=${restaurant.id}`
+            data = await antellizer.loadMenu(url)
+        }
 
         if (data) {
+            // Use the predefined restaurant name and url if 'data' doesn't define it. Currently needed for the 'antell' case.
+            data.meta = Object.assign({}, {ref_title: restaurant.name, ref_url: url}, data.meta)
             result.push(data)
         }
     }
