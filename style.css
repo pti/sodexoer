@@ -1,3 +1,11 @@
+body {
+    --main-fg-color: #010101;
+    --main-bg-color: #FAFAFA;
+    --secondary-bg-color: #F1F1F1;
+    background-color: var(--main-bg-color);
+    color: var(--main-fg-color);
+    font-family: 'Fira Sans', sans-serif;
+}
 .active {
     background-color: #F4F6F8;
 }
@@ -7,7 +15,6 @@
     border-radius: 4px;
 }
 .weekday {
-    font-family: Open Sans, sans-serif;
     font-size: 14px;
     font-weight: bold;
     margin: 0px 0 4px 0;
@@ -17,13 +24,11 @@
     line-height: 1.0;
 }
 .text {
-    font-family: Fira Sans, Roboto, sans-serif;
     font-size: 14px;
     margin-right: 6px;
     line-height: 1.0;
 }
 .desc {
-    font-family: Fira Sans, Roboto, sans-serif;
     font-size: 12px;
     vertical-align: middle;
     margin-right: 6px;
@@ -31,11 +36,10 @@
 }
 .info {
     border-radius: 10px;
-    background: #F0F0F0;
+    background: var(--secondary-bg-color);
     border-style: solid;
-    border-color: #F0F0F0;
+    border-color: var(--secondary-bg-color);
     border-width: 0px 5px 0px 5px;
-    font-family: Open Sans, sans-serif;
     font-size: 10px;
     margin-right: 2px;
 }
@@ -48,12 +52,12 @@ td {
 }
 .restaurant_header {
     padding: 12px 8px 12px 12px;
-    font-family: Open Sans, sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 16px;
     font-weight: bold;
     text-align: left;
 }
 a {
     text-decoration: none;
-    color: black;
+    color: var(--main-fg-color);
 }

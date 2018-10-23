@@ -13,6 +13,16 @@ const weekdayNames = {
     sunday: "Sunnuntai"
 }
 
+const weekdayValues = {
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+    sunday: 0
+}
+
 const args = process.argv.slice(2)
 const lang = "fi"
 
@@ -22,12 +32,20 @@ const restaurants = [
     {type: 'antell', id: 342, name: 'Farmi'},
 ]
 
-const template = fs.readFileSync('template.html', 'utf8')
+doStuff()
 
-writeTableContent()
-
-async function writeTableContent() {
+async function doStuff() {
+    const day_dst = _.defaultTo(args[0], 'output.html')
+    const week_dst = _.defaultTo(args[1], 'week.html')
+    const currentDay = (new Date()).getDay()
     const weekDatas = await getWeekDatas(restaurants)
+
+    writeTableContent(day_dst, currentDay, weekDatas)
+    writeTableContent(week_dst, undefined, weekDatas)
+}
+
+function writeTableContent(dst, currentDay, weekDatas) {
+    const template = fs.readFileSync('template.html', 'utf8')
     let out = ""
     out += "<tr>"
 
@@ -46,6 +64,10 @@ async function writeTableContent() {
     for (const weekday in weekdayNames) {
         
         if (weekDatas.map(wd => wd.menus[weekday]).filter(menu => menu !== undefined).length == 0) {
+            continue
+        }
+
+        if (currentDay !== undefined && weekdayValues[weekday] != currentDay) {
             continue
         }
 
@@ -76,7 +98,6 @@ async function writeTableContent() {
     }
 
     const result = template.replace('<##>', out)
-    const dst = _.defaultTo(_.head(args), 'output.html')
     fs.writeFileSync(dst, result, 'utf8')    
 }
 
