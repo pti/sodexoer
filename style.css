@@ -50,14 +50,30 @@ body {
 td {
     vertical-align: top;    
 }
-.restaurant_header {
-    padding: 12px 8px 12px 12px;
+a {
+    text-decoration: none;
+    color: var(--main-fg-color);
+}
+.day_restaurant_header, .restaurant_header {
     font-family: 'Open Sans', sans-serif;
     font-size: 16px;
     font-weight: bold;
     text-align: left;
 }
-a {
-    text-decoration: none;
-    color: var(--main-fg-color);
+.restaurant_header {
+    padding: 12px 8px 12px 12px;
+}
+.day_restaurant_header {
+    padding: 12px 8px 8px 0px;
+}
+.day_container {
+    display: grid;
+    grid-gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-auto-columns: auto;
+}
+.day_menu {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }

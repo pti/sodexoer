@@ -23,6 +23,8 @@ const weekdayValues = {
     sunday: 0
 }
 
+const weekdayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
 const args = process.argv.slice(2)
 const lang = "fi"
 
@@ -40,8 +42,42 @@ async function doStuff() {
     const currentDay = (new Date()).getDay()
     const weekDatas = await getWeekDatas(restaurants)
 
-    writeTableContent(day_dst, currentDay, weekDatas)
+    writeDayMenus(day_dst, currentDay, weekDatas)
     writeTableContent(week_dst, undefined, weekDatas)
+}
+
+function writeDayMenus(dst, currentDay, weekDatas) {
+    const template = fs.readFileSync('day-tmpl.html', 'utf8')
+    let out = ""
+
+    // Write a div per restaurant.
+    for (const weekData of weekDatas) {
+
+        const restaurant = {
+            name: weekData.meta.ref_title,
+            url: weekData.meta.ref_url
+        }
+
+        const weekdayKey = weekdayKeys[currentDay];
+        const weekdayName = weekdayNames[weekdayKey];
+        const weekdayMenu = weekData.menus[weekdayKey];
+
+        out += "<div class='day_menu'>"
+        out += `<div class="day_restaurant_header"><a href="${restaurant.url}">${restaurant.name}</a></div>`
+        out += `<p class="weekday">${weekdayName}</p>`
+
+        if (weekdayMenu !== undefined) {
+
+            for (const item of weekdayMenu) {
+                out += menuItemAsHtml(item, lang)
+            }
+        }
+
+        out += "</div>"
+    }
+
+    const result = template.replace('<##>', out)
+    fs.writeFileSync(dst, result, 'utf8')
 }
 
 function writeTableContent(dst, currentDay, weekDatas) {
@@ -98,7 +134,7 @@ function writeTableContent(dst, currentDay, weekDatas) {
     }
 
     const result = template.replace('<##>', out)
-    fs.writeFileSync(dst, result, 'utf8')    
+    fs.writeFileSync(dst, result, 'utf8')
 }
 
 function menuItemAsHtml(item, lang) {
