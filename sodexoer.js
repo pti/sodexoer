@@ -31,7 +31,7 @@ const lang = "fi"
 const restaurants = [
     {type: 'sodexo', id: 134, name: 'Hermia 5'},
     {type: 'sodexo', id: 9870, name: 'Hermia 6'},
-    {type: 'antell', id: 342, name: 'Farmi'},
+    {type: 'antell', id: 'hermian-farmi', name: 'Farmi'},
 ]
 
 doStuff()
@@ -91,14 +91,14 @@ function writeTableContent(dst, currentDay, weekDatas) {
             name: weekData.meta.ref_title,
             url: weekData.meta.ref_url
         }
-    
+
         out += `<th class="restaurant_header"><a href="${restaurant.url}">${restaurant.name}</a></th>`
     }
 
     out += "</tr>"
 
     for (const weekday in weekdayNames) {
-        
+
         if (weekDatas.map(wd => wd.menus[weekday]).filter(menu => menu !== undefined).length == 0) {
             continue
         }
@@ -117,17 +117,17 @@ function writeTableContent(dst, currentDay, weekDatas) {
         for (const weekData of weekDatas) {
             out += '<td class="day">'
             out += `<p class="weekday">${weekdayName}</p>`
-    
+
             const menuItems = weekData.menus[weekday]
 
             if (menuItems !== undefined) {
 
                 for (const item of menuItems) {
                     out += menuItemAsHtml(item, lang)
-                }    
+                }
             }
 
-            out += '</td>'    
+            out += '</td>'
         }
 
         out += "</tr>"
@@ -193,7 +193,7 @@ async function getWeekDatas(restaurantIds) {
             data = await get(url)
 
         } else if (restaurant.type == 'antell') {
-            url = `https://www.antell.fi/lounaslistat/lounaslista.html?owner=${restaurant.id}`
+            url = `https://www.antell.fi/${restaurant.id}/`
             data = await antellizer.loadMenu(url)
         }
 

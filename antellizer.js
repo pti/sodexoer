@@ -11,102 +11,83 @@ const weekdayMap = new Map([
     ["Sunnuntai", "sunday"],
 ])
 
-const ignoreRegExps = createIgnoreRegExps()
-
-function createIgnoreRegExps() {
-    const ignoreTexts = ['BBQ-GRILLI', 'PÄIVÄN LOUNAS', 'DELI', 'PÄIVÄN JÄLKIRUOKA']
-    let regExps = []
-
-    for (it of ignoreTexts) {
-        regExps.push(new RegExp(`${it}(:\\s*)?`))
-    }
-
-    regExps.push(new RegExp('\\d+,\\d+'))
-    return regExps
-}
-
-function removeIgnoreTexts(txt) {
-
-    for (ire of ignoreRegExps) {
-        txt = txt.replace(ire, '')
-    }
-    
-    return txt
-}
-
 /**
  * Loads the HTML page containing the weekly menu and parses the information.
- * 
+ *
  * @param {string} url weekly menu web page URL.
  * @returns an object containing the menu information, structure has some similarities with the Sodexo JSON.
  */
 async function loadMenu(url) {
-    
     let html = await get(url)
 
     if (html == null) {
         return
     }
 
-    const doc = cheerio.load(html)
-    let table = doc('table#lunch-content-table')
-    doc('.lunch-footer-table').remove()
-    doc('.lunch-ad').remove()
- 
-    let inner = table.find('td.outer')
-    inner.find('table').last().remove() // Removes the part with share options.
-    inner.find('table').last().remove() // Removes the legend part.
     let menu = {}
     let weekdayItems = undefined
-    const partPattern = new RegExp('', 'g')
 
-    inner.find('td').each(function(i, elem) {
-        let k = doc(this)
+    const doc = cheerio.load(html)
+    let elem = doc('div .lunch-menu-language').first().find('h3').first()
 
-        if (k.has('td').length == 0) {
-            let txt = k.text().trim()
+    while (true) {
 
-            if (txt.length > 0) {
-                txt = removeIgnoreTexts(txt)
+        if (elem.is('h3') && elem.text() !== undefined) {
+            let wd = weekdayMap.get(elem.text().replace(/^(\w+).*/, '$1'))
 
-                if (txt.length > 0) {
-                    const wd = weekdayMap.get(txt)
+            if (wd !== undefined) {
+                weekdayItems = []
+                menu[wd] = weekdayItems
+            }
 
-                    if (wd !== undefined) {
-                        weekdayItems = []
-                        menu[wd] = weekdayItems
+        } else if (elem.is('ul')) {
 
-                    } else {
-                        // Each menu item can contain multiple pieces and each can have their own set of properties (L, G and such).
-                        // Split the item to pieces and create an object for each that defines the text part and the properties.
-                        // HTML generator can the apply proper styling for the separated properties.
-                        const pieces = txt.split(/\(([A-Z,*]+)\)/)
-                        let parts = []
+            elem.find('li').each((i, elem) => {
+                const li = doc(elem)
 
-                        for (let i = 0; i < pieces.length; i += 2) {
-                            let properties = []
-                            let text = pieces[i]
+                if (li.attr('class') === 'menu-item-category') {
+                    const type = li.find('strong').first().text().trim()
 
-                            if (text.length == 0) {
-                                continue
-                            }
+                } else {
+                    let txt = li.text()
+                        .trim()
+                        .replace(/\s{2,}/g, ' ')
+                        .replace(/ ,/, ',')
 
-                            if (i < pieces.length - 1) {
-                                properties = pieces[i + 1].split(',')
-                            }
+                    // Each menu item can contain multiple pieces and each can have their own set of properties (L, G and such).
+                    // Split the item to pieces and create an object for each that defines the text part and the properties.
+                    // HTML generator can the apply proper styling for the separated properties.
+                    const pieces = txt.split(/\(((?:(?:Veg|[A-Z*])(?:, )?)+)\)/)
+                    let parts = []
 
-                            parts.push({
-                                text: text.trim(),
-                                properties: properties
-                            })
+                    for (let i = 0; i < pieces.length; i += 2) {
+                        let properties = []
+                        let text = pieces[i]
+
+                        if (text.length == 0) {
+                            continue
                         }
 
-                        weekdayItems.push({parts: parts})
+                        if (i < pieces.length - 1) {
+                            properties = pieces[i + 1].split(/, ?/)
+                        }
+
+                        parts.push({
+                            text: text.trim().replace(/^, /, ''),
+                            properties: properties
+                        })
                     }
-                }    
-            }
+
+                    weekdayItems.push({parts: parts})
+                }
+            })
+
+        } else {
+            break;
         }
-    })
+
+        elem = elem.next()
+    }
 
     return {
         menus: menu
