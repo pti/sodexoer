@@ -2,6 +2,7 @@ const needle = require('needle')
 const fs = require('fs')
 const _ = require('lodash')
 const antellizer = require('./antellizer.js')
+const { DateTime } = require('luxon')
 
 const weekdayNames = {
     monday: "Maanantai",
@@ -29,8 +30,8 @@ const args = process.argv.slice(2)
 const lang = "fi"
 
 const restaurants = [
-    {type: 'sodexo', id: 134, name: 'Hermia 5'},
-    {type: 'sodexo', id: 9870, name: 'Hermia 6'},
+    {type: 'sodexo', id: 107, name: 'Hermia 5'},
+    {type: 'sodexo', id: 110, name: 'Hermia 6'},
     {type: 'antell', id: 'hermian-farmi', name: 'Farmi'},
 ]
 
@@ -172,13 +173,8 @@ function zeroPad(number) {
     return number < 10 ? "0" + number : number;
 }
 
-function datePart() {
-    const date = new Date()
-    return `${date.getFullYear()}/${zeroPad(date.getMonth() + 1)}/${zeroPad(date.getDate())}`
-}
-
-function sodexoWeeklyUrl(restaurantId) {
-    return `https://www.sodexo.fi/ruokalistat/output/weekly_json/${restaurantId}/${datePart()}/${lang}`
+function formatDate(date) {
+    return `${date.getFullYear()}-${zeroPad(date.getMonth() + 1)}-${zeroPad(date.getDate())}`
 }
 
 async function getWeekDatas(restaurantIds) {
@@ -189,8 +185,7 @@ async function getWeekDatas(restaurantIds) {
         let url = undefined
 
         if (restaurant.type == 'sodexo') {
-            url = sodexoWeeklyUrl(restaurant.id)
-            data = await get(url)
+            data = await getSodexoWeeklyMenu(restaurant.id)
 
         } else if (restaurant.type == 'antell') {
             url = `https://www.antell.fi/${restaurant.id}/`
@@ -205,6 +200,30 @@ async function getWeekDatas(restaurantIds) {
     }
 
     return result
+}
+
+async function getSodexoWeeklyMenu(restaurantId) {
+    let weekData = {}
+    weekData.menus = {}
+
+    for (let weekday = 1; weekday <= 7; weekday++) {
+        let date = DateTime.local().set({ weekday: weekday }).toJSDate()
+        let dailyUrl = `https://www.sodexo.fi/ruokalistat/output/daily_json/${restaurantId}/${formatDate(date)}`
+        let dailyData = await get(dailyUrl)
+
+        if (dailyData) {
+
+            if (!weekData.meta && dailyData.meta) {
+                weekData.meta = dailyData.meta
+            }
+
+            if (dailyData.courses) {
+                weekData.menus[weekdayKeys[weekday % 7]] = Object.values(dailyData.courses)
+            }
+        }
+    }
+
+    return weekData
 }
 
 async function get(url) {
