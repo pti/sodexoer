@@ -2,10 +2,18 @@ body {
     --main-fg-color: #010101;
     --main-bg-color: #FAFAFA;
     --secondary-bg-color: #F1F1F1;
+
     background-color: var(--main-bg-color);
     color: var(--main-fg-color);
     font-family: 'Fira Sans', sans-serif;
     font-size: 100%;
+}
+@media (prefers-color-scheme: dark) {
+    body {
+        --main-fg-color: #F1F1F1;
+        --main-bg-color: #242424;
+        --secondary-bg-color: #505050;
+    }
 }
 @media only screen and (max-device-width: 360px) {
     body {
