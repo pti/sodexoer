@@ -7,7 +7,7 @@
   "license": "ISC",
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "luxon": "^1.24.1",
     "needle": "^2.5.0"
   }
